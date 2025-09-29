@@ -1,7 +1,9 @@
 import { validateDataType } from "./helper/dataType.js";
+import { isArray } from './helper/isArray.js';
 
 const dict = {
     dataType: validateDataType,
+    isArray: isArray,
 };
 
 function validate(paramObjArr, checkAllParams = false) {

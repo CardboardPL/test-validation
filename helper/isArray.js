@@ -1,4 +1,4 @@
-function isArray(value, direct = true) {
+export function isArray(value, direct = true) {
     if (typeof direct !== 'boolean') throw new Error('Rule value must be a boolean');
     
     const isArray = Array.isArray(value);
