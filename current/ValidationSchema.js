@@ -1,4 +1,4 @@
-import { SchemaField } from "./SchemaField";
+import { SchemaField } from './SchemaField.js';
 
 class ValidationSchema {
     #schema;
@@ -15,8 +15,10 @@ class ValidationSchema {
         for (const key in schema) {
             run = true;
 
-            // Ensure that the values of the properties of the scheme is an instance of a SchemaField
-            if (!(schema[key] instanceof SchemaField)) throw new Error('Invalid Schema: The values of the properties of a schema must be an instance of a "SchemaField"');
+            // Ensure that the value of the properties of the schema is either an instance of SchemaField or ValidationSchema            
+            if (!(schema[key] instanceof SchemaField) || !(schema[key] instanceof ValidationSchema)) {
+                throw new Error(`Invalid Schema: Invalid Field at ${key}`);
+            }
         }
         if (!run) throw new Error('Invalid Schema: Schema must not be empty.');
 
