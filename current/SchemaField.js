@@ -1,4 +1,4 @@
-class SchemaField {
+export class SchemaField {
     #dataTypeMethodsLocked = false;
     orderArray = [];
 
