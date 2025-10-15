@@ -1,8 +1,9 @@
 import { Queue } from './../data-structures/Queue.js';
 import { Node } from '../data-structures/LinkedList.js';
 import { SchemaField } from './SchemaField.js';
+import { ValidatorFunctions } from './Validator.js';
 
-class ValidationSchema {
+export class ValidationSchema {
     #lockMapSchema;
     #schema;
 
@@ -51,7 +52,8 @@ class ValidationSchema {
                 if (schema[key] instanceof ValidationSchema) {
                     queue.enqueue(new Node(null, null, { schema: schema[key].getSchema(), key: newKeyName }));
                 } else {
-                    newSchema[newKeyName] = schema[key];
+                    newSchema[newKeyName] = Object.freeze(schema[key]);
+                    Object.freeze(schema[key].operationsMap);
                 }
             }
         }
@@ -65,5 +67,25 @@ class ValidationSchema {
 
     getSchema() {
         return this.#schema;
+    }
+
+    getField(fieldName) {
+        return this.#schema[fieldName];
+    }
+
+    validate(schemaData) {
+        const schemaResults = { status: true, results: {} };
+
+        // Process each SchemaField
+        for (const fieldName in this.#schema) {
+            const schemaField = this.#schema[fieldName];
+            const data = schemaData[fieldName]; 
+            
+            const { status, messages } = schemaField.validate(data);
+            schemaResults.results[fieldName] = { status, messages };
+            schemaResults.status = schemaResults.status === false ? schemaResults.status : status;
+        }
+
+        return schemaResults;
     }
 }
