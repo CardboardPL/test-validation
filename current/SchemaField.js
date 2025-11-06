@@ -85,31 +85,10 @@ export class SchemaField {
             return { status: false, message: 'Field is required' }
         }
 
-        const handleDataType = (obj) => {
-            const { status, message } = obj;
-            isValid = isValid === false ? isValid : status;
-            results['dataType'] = message
-        }
-
-        switch (schemaFieldOpMap.dataType) {
-            case 'string':
-                handleDataType(ValidatorFunctions.string(data));
-                break;
-            case 'number':
-                handleDataType(ValidatorFunctions.number(data))
-                break;
-            case 'boolean':
-                handleDataType(ValidatorFunctions.boolean(data))
-                break;
-            case 'array':
-                handleDataType(ValidatorFunctions.array(data))
-                break;
-            case 'object':
-                handleDataType(ValidatorFunctions.object(data))
-                break;
-            default:
-                throw new Error('Invalid Data Type');
-        }
+        // Handle Data Type Checks
+        const dataTypeResults = ValidatorFunctions.dataType(schemaFieldOpMap.dataType, data);
+        results['dataType'] = dataTypeResults.message;
+        isValid = isValid === false ? isValid : dataTypeResults.status;
 
         if (!isValid) return { status: isValid, messages: results };
     }
