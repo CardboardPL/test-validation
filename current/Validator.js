@@ -1,41 +1,26 @@
 export const ValidatorFunctions = {
-    string: (val) => {
-        const isString = typeof val === 'string';
-        return { 
-            status: isString, 
-            message: isString ? "Success" : `Failed: Expected a string but received a ${typeof val}` 
-        };
-    },
+    dataType: (type, val) => {
+        const validTypes = ['string', 'number', 'boolean', 'array', 'object'];
+        if (!validTypes.includes(type)) throw new Error('Invalid Data Type');
 
-    number: (val) => {
-        const isNumber = typeof val === 'number';
-        return { 
-            status: isNumber, 
-            message: isNumber ? "Success" : `Failed: Expected a number but received a ${typeof val}` 
-        };
-    },
+        const typeofVal = typeof val;
+        let isValid = typeofVal === type;
 
-    boolean: (val) => {
-        const isBoolean = typeof val === 'boolean';
-        return { 
-            status: isBoolean, 
-            message: isBoolean ? "Success" : `Failed: Expected a boolean but received a ${typeof val}` 
-        };
-    },
+        if (type === 'array') {
+            isValid = Array.isArray(val);
+            typeofVal = isValid ? 'array' : typeofVal;
+        }
 
-    array: (val) => {
-        const isArray = Array.isArray(val);
-        return { 
-            status: isArray, 
-            message: isArray ? "Success" : `Failed: Expected an array but received a ${typeof val}` 
-        };
-    },
+        if (val === null) {
+            typeofVal = 'null';
+            isValid = type === 'object' ? false : isValid;
+        }
 
-    object: (val) => {
-        const isObject = typeof val === 'object';
-        return { 
-            status: isObject, 
-            message: isObject ? "Success" : `Failed: Expected an object but received a ${typeof val}` 
-        };
+        return {
+            status: isValid,
+            message: isValid ? 
+                'Success' : 
+                `Failed: Expected a ${type} but received a ${typeofVal}.`
+        }
     },
 }
