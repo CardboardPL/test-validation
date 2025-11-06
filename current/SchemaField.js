@@ -2,51 +2,78 @@ import { ValidatorFunctions } from './Validator.js';
 
 export class SchemaField {
     #dataTypeMethodsLocked = false;
+    #numericalMethodsLocked = false;
     operationsMap = {};
 
+    #lockedFunction() {
+        throw new Error('Called a locked method');
+    }
+
+    // General Methods
+    required() {
+        this.operationsMap['required'] = true;
+        this.required = () => this.#lockedFunction();
+        return this;
+    }
+
+    // Data Type Methods
     string() {
-        if (this.#dataTypeMethodsLocked) throw new Error('Called a locked method');
+        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
         this.operationsMap['dataType'] = 'string';
         this.#dataTypeMethodsLocked = true;
+        this.#numericalMethodsLocked = true;
         return this;
     }
 
     number() {
-        if (this.#dataTypeMethodsLocked) throw new Error('Called a locked method');
+        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
         this.operationsMap['dataType'] = 'number';
         this.#dataTypeMethodsLocked = true;
         return this;
     }
 
     boolean() {
-        if (this.#dataTypeMethodsLocked) throw new Error('Called a locked method');
+        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
         this.operationsMap['dataType'] = 'boolean';
         this.#dataTypeMethodsLocked = true;
+        this.#numericalMethodsLocked = true;
         return this;
     }
 
     array() {
-        if (this.#dataTypeMethodsLocked) throw new Error('Called a locked method');
+        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
         this.operationsMap['dataType'] = 'array';
         this.#dataTypeMethodsLocked = true;
+        this.#numericalMethodsLocked = true;
         return this;
     }
 
     object() {
-        if (this.#dataTypeMethodsLocked) throw new Error('Called a locked method');
+        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
         this.operationsMap['dataType'] = 'object';
         this.#dataTypeMethodsLocked = true;
+        this.#numericalMethodsLocked = true;
         return this;
     }
 
-    required() {
-        this.operationsMap['required'] = true;
-        this.required = function() {
-            throw new Error('Called a locked method');
-        };
+    // Numerical Methods
+    integer() {
+        if (this.#numericalMethodsLocked) this.#lockedFunction();
+        
+        this.operationsMap['integer'] = true;
+        this.integer = () => this.#lockedFunction();
         return this;
     }
 
+    min(value) {
+        if (this.#numericalMethodsLocked) this.#lockedFunction();
+
+        this.operationsMap['min'] = value;
+        this.min = () => this.#lockedFunction();
+        return this;
+    }
+
+    // Validation Method
     validate(data) {
         const schemaFieldOpMap = this.operationsMap;
         let isValid = true;
@@ -84,6 +111,6 @@ export class SchemaField {
                 throw new Error('Invalid Data Type');
         }
 
-        return { status: isValid, messages: results };
+        if (!isValid) return { status: isValid, messages: results };
     }
 }
