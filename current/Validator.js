@@ -21,6 +21,15 @@ export const ValidatorFunctions = {
             message: isValid ? 
                 'Success' : 
                 `Failed: Expected a ${type} but received a ${typeofVal}.`
-        }
+        };
     },
+    integer: (val) => {
+        const isValid = Number.isInteger(val);
+        return {
+            status: isValid,
+            message: isValid ? 
+                'Success' :
+                `Failed: Expected an integer but received ${val}.`
+        };
+    }
 }
