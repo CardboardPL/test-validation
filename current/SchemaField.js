@@ -3,10 +3,37 @@ import { ValidatorFunctions } from './Validator.js';
 export class SchemaField {
     #dataTypeMethodsLocked = false;
     #numericalMethodsLocked = false;
-    operationsMap = {};
+    operationsMap = {
+        numericalMethods: []
+    };
 
     #lockedFunction() {
         throw new Error('Called a locked method');
+    }
+
+    #logResults(results, checkResult, key) {
+        results.checks[key] = checkResult;
+        if (results.status !== false && results.status !== checkResult.status) {
+            results.status = checkResult.status;
+        }
+    }
+
+    #pushMethod(location, methodName, value, func) {
+        if (!Array.isArray(this.operationsMap[location])) throw new Error('Invalid location.');
+        this.operationsMap[location].push({
+            methodName,
+            value,
+            func
+        });
+    }
+
+    #getValidMethodArray(dataType) {
+        switch(dataType) {
+            case 'number':
+                return this.operationsMap.numericalMethods;
+            default:
+                throw new Error('Invalid data type');
+        }
     }
 
     // General Methods
@@ -59,37 +86,45 @@ export class SchemaField {
     // Numerical Methods
     integer() {
         if (this.#numericalMethodsLocked) this.#lockedFunction();
-        
-        this.operationsMap['integer'] = true;
+        this.#pushMethod('numericalMethods', 'integer', true, ValidatorFunctions.integer);
         this.integer = () => this.#lockedFunction();
         return this;
     }
 
     min(value) {
         if (this.#numericalMethodsLocked) this.#lockedFunction();
-
-        this.operationsMap['min'] = value;
+        this.#pushMethod('numericalMethods', 'min', value, ValidatorFunctions.min);
         this.min = () => this.#lockedFunction();
         return this;
     }
 
     // Validation Method
     validate(data) {
-        const schemaFieldOpMap = this.operationsMap;
-        let isValid = true;
-        const results = {};
-
-        if (schemaFieldOpMap.required && (
-            data == null || data === ''
-        )) {
-            return { status: false, message: 'Field is required' }
+        const opMap = this.operationsMap;
+        const results = {
+            status: true,
+            checks: {}
         }
 
-        // Handle Data Type Checks
-        const dataTypeResults = ValidatorFunctions.dataType(schemaFieldOpMap.dataType, data);
-        results['dataType'] = dataTypeResults.message;
-        isValid = isValid === false ? isValid : dataTypeResults.status;
+        if (opMap.required && (data == null || data === '')) {
+            this.#logResults(results, { 
+                status: false, 
+                message: 'Field is required'
+            }, 'schemaField');
+            return results;
+        }
 
-        if (!isValid) return { status: isValid, messages: results };
+        const dataType = opMap.dataType;
+
+        // Handle Data Type Checks
+        this.#logResults(results, ValidatorFunctions.dataType(dataType, data), 'dataType');
+
+        // Run Data Type Specific Checks
+        const validators = this.#getValidMethodArray(dataType);
+        for (const validator of validators) {
+            this.#logResults(results, validator.func(validator.value, data), validator.methodName);
+        }
+
+        return results;
     }
 }
