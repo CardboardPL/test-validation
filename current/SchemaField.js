@@ -7,8 +7,10 @@ export class SchemaField {
         numericalMethods: []
     };
 
-    #lockedFunction() {
-        throw new Error('Called a locked method');
+    #lockMethod(methodName) {
+        this[methodName] = () => { 
+            throw new Error(`${methodName} can't be called at this stage.`);
+        };
     }
 
     #logResults(results, checkResult, key) {
@@ -39,13 +41,13 @@ export class SchemaField {
     // General Methods
     required() {
         this.operationsMap['required'] = true;
-        this.required = () => this.#lockedFunction();
+        this.#lockMethod('required');
         return this;
     }
 
     // Data Type Methods
     string() {
-        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
+        if (this.#dataTypeMethodsLocked) this.#lockMethod('string');
         this.operationsMap['dataType'] = 'string';
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -53,14 +55,14 @@ export class SchemaField {
     }
 
     number() {
-        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
+        if (this.#dataTypeMethodsLocked) this.#lockMethod('number');
         this.operationsMap['dataType'] = 'number';
         this.#dataTypeMethodsLocked = true;
         return this;
     }
 
     boolean() {
-        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
+        if (this.#dataTypeMethodsLocked) this.#lockMethod('boolean');
         this.operationsMap['dataType'] = 'boolean';
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -68,7 +70,7 @@ export class SchemaField {
     }
 
     array() {
-        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
+        if (this.#dataTypeMethodsLocked) this.#lockMethod('array');
         this.operationsMap['dataType'] = 'array';
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -76,7 +78,7 @@ export class SchemaField {
     }
 
     object() {
-        if (this.#dataTypeMethodsLocked) this.#lockedFunction();
+        if (this.#dataTypeMethodsLocked) this.#lockMethod('object');
         this.operationsMap['dataType'] = 'object';
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -85,16 +87,16 @@ export class SchemaField {
 
     // Numerical Methods
     integer() {
-        if (this.#numericalMethodsLocked) this.#lockedFunction();
+        if (this.#numericalMethodsLocked) this.#lockMethod('integer');
         this.#pushMethod('numericalMethods', 'integer', true, ValidatorFunctions.integer);
-        this.integer = () => this.#lockedFunction();
+        this.#lockMethod('integer');
         return this;
     }
 
     min(value) {
-        if (this.#numericalMethodsLocked) this.#lockedFunction();
+        if (this.#numericalMethodsLocked) this.#lockMethod('min');
         this.#pushMethod('numericalMethods', 'min', value, ValidatorFunctions.min);
-        this.min = () => this.#lockedFunction();
+        this.#lockMethod('min');
         return this;
     }
 
