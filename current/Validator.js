@@ -40,5 +40,23 @@ export const ValidatorFunctions = {
             errorMessage || `Failed: Expected an integer but received ${val}.`, 
             successMessage || 'Success'
         );
+    },
+
+    min: (val, minVal, errorMessage, successMessage) => {
+        const isValid  = val >= minVal;
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed: Expected a value greater than or equal to ${minVal} but received ${val}.`, 
+            successMessage || 'Success'
+        );
+    },
+
+    max: (val, maxVal, errorMessage, successMessage) => {
+        const isValid = val <= maxVal;
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed: Expected a value less than or equal to ${maxVal} but received ${val}.`, 
+            successMessage || 'Success'
+        );
     }
 }
