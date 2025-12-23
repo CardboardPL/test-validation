@@ -1,5 +1,14 @@
+function createValidationResult(status, errorMessage = 'Failed', successMessage = 'Success') {
+    return {
+        status,
+        message: status ? 
+            successMessage :
+            errorMessage
+    };
+}
+
 export const ValidatorFunctions = {
-    dataType: (type, val) => {
+    dataType: (type, val, errorMessage, successMessage) => {
         const validTypes = ['string', 'number', 'boolean', 'array', 'object'];
         if (!validTypes.includes(type)) throw new Error('Invalid Data Type');
 
@@ -16,20 +25,20 @@ export const ValidatorFunctions = {
             isValid = type === 'object' ? false : isValid;
         }
 
-        return {
-            status: isValid,
-            message: isValid ? 
-                'Success' : 
-                `Failed: Expected a ${type} but received a ${typeofVal}.`
-        };
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed: Expected a ${type} but received a ${typeofVal}.`, 
+            successMessage || 'Success'
+        );
     },
-    integer: (val) => {
+    
+    // Number specific functions
+    integer: (val, errorMessage, successMessage) => {
         const isValid = Number.isInteger(val);
-        return {
-            status: isValid,
-            message: isValid ? 
-                'Success' :
-                `Failed: Expected an integer but received ${val}.`
-        };
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed: Expected an integer but received ${val}.`, 
+            successMessage || 'Success'
+        );
     }
 }
