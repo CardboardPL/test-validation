@@ -2,8 +2,10 @@ import { ValidatorFunctions } from './Validator.js';
 
 export class SchemaField {
     #dataTypeMethodsLocked = false;
+    #stringMethodsLocked = false;
     #numericalMethodsLocked = false;
     operationsMap = {
+        stringMethods: [],
         numericalMethods: []
     };
 
@@ -33,6 +35,8 @@ export class SchemaField {
         switch(dataType) {
             case 'number':
                 return this.operationsMap.numericalMethods;
+            case 'string':
+                return this.operationsMap.stringMethods;
             default:
                 throw new Error('Invalid data type');
         }
@@ -58,6 +62,7 @@ export class SchemaField {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('number');
         this.operationsMap['dataType'] = 'number';
         this.#dataTypeMethodsLocked = true;
+        this.#stringMethodsLocked = true;
         return this;
     }
 
@@ -65,6 +70,7 @@ export class SchemaField {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('boolean');
         this.operationsMap['dataType'] = 'boolean';
         this.#dataTypeMethodsLocked = true;
+        this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
@@ -73,6 +79,7 @@ export class SchemaField {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('array');
         this.operationsMap['dataType'] = 'array';
         this.#dataTypeMethodsLocked = true;
+        this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
@@ -81,6 +88,7 @@ export class SchemaField {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('object');
         this.operationsMap['dataType'] = 'object';
         this.#dataTypeMethodsLocked = true;
+        this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
@@ -97,6 +105,28 @@ export class SchemaField {
         if (this.#numericalMethodsLocked) this.#lockMethod('min');
         this.#pushMethod('numericalMethods', 'min', value, ValidatorFunctions.min);
         this.#lockMethod('min');
+        return this;
+    }
+
+    max(value) {
+        if (this.#numericalMethodsLocked) this.#lockMethod('max');
+        this.#pushMethod('numericalMethods', 'max', value, ValidatorFunctions.max);
+        this.#lockMethod('max');
+        return this;
+    }
+
+    // String methods
+    minLength(value) {
+        if (this.#stringMethodsLocked) this.#lockMethod('minLength');
+        this.#pushMethod('stringMethods', 'minLength', value, ValidatorFunctions.minLength);
+        this.#lockMethod('minLength');
+        return this;
+    }
+
+    maxLength(value) {
+        if (this.#stringMethodsLocked) this.#lockMethod('maxLength');
+        this.#pushMethod('stringMethods', 'maxLength', value, ValidatorFunctions.maxLength);
+        this.#lockMethod('maxLength');
         return this;
     }
 

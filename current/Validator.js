@@ -58,5 +58,24 @@ export const ValidatorFunctions = {
             errorMessage || `Failed: Expected a value less than or equal to ${maxVal} but received ${val}.`, 
             successMessage || 'Success'
         );
+    },
+
+    // String specific functions
+    minLength: (val, minLength, errorMessage, successMessage) => {
+        const isValid = val.length >= minLength;
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed expected a length greater than or equal to ${minLength} but received ${val.length}.`,
+            successMessage || 'Success'
+        );
+    },
+
+    maxLength: (val, maxLength, errorMessage, successMessage) => {
+        const isValid = val.length <= maxLength;
+        return createValidationResult(
+            isValid, 
+            errorMessage || `Failed expected a length less than or equal to ${maxLength} but received ${val.length}.`,
+            successMessage || 'Success'
+        );
     }
 }
