@@ -94,38 +94,38 @@ export class SchemaField {
     }
 
     // Numerical Methods
-    integer() {
+    integer(errorMessage = null, successMessage = null) {
         if (this.#numericalMethodsLocked) this.#lockMethod('integer');
-        this.#pushMethod('numericalMethods', 'integer', true, ValidatorFunctions.integer);
+        this.#pushMethod('numericalMethods', 'integer', [errorMessage, successMessage], ValidatorFunctions.integer);
         this.#lockMethod('integer');
         return this;
     }
 
-    min(value) {
+    min(value, errorMessage = null, successMessage = null) {
         if (this.#numericalMethodsLocked) this.#lockMethod('min');
-        this.#pushMethod('numericalMethods', 'min', value, ValidatorFunctions.min);
+        this.#pushMethod('numericalMethods', 'min', [value, errorMessage, successMessage], ValidatorFunctions.min);
         this.#lockMethod('min');
         return this;
     }
 
-    max(value) {
+    max(value, errorMessage = null, successMessage = null) {
         if (this.#numericalMethodsLocked) this.#lockMethod('max');
-        this.#pushMethod('numericalMethods', 'max', value, ValidatorFunctions.max);
+        this.#pushMethod('numericalMethods', 'max', [value, errorMessage, successMessage], ValidatorFunctions.max);
         this.#lockMethod('max');
         return this;
     }
 
     // String methods
-    minLength(value) {
+    minLength(value, errorMessage = null, successMessage = null) {
         if (this.#stringMethodsLocked) this.#lockMethod('minLength');
-        this.#pushMethod('stringMethods', 'minLength', value, ValidatorFunctions.minLength);
+        this.#pushMethod('stringMethods', 'minLength', [value, errorMessage, successMessage], ValidatorFunctions.minLength);
         this.#lockMethod('minLength');
         return this;
     }
 
-    maxLength(value) {
+    maxLength(value, errorMessage = null, successMessage = null) {
         if (this.#stringMethodsLocked) this.#lockMethod('maxLength');
-        this.#pushMethod('stringMethods', 'maxLength', value, ValidatorFunctions.maxLength);
+        this.#pushMethod('stringMethods', 'maxLength', [value, errorMessage, successMessage], ValidatorFunctions.maxLength);
         this.#lockMethod('maxLength');
         return this;
     }
@@ -154,7 +154,7 @@ export class SchemaField {
         // Run Data Type Specific Checks
         const validators = this.#getValidMethodArray(dataType);
         for (const validator of validators) {
-            this.#logResults(results, validator.func(validator.value, data), validator.methodName);
+            this.#logResults(results, validator.func(data, ...validator.value), validator.methodName);
         }
 
         return results;
