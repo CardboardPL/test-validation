@@ -8,7 +8,7 @@ function createValidationResult(status, errorMessage = 'Failed', successMessage 
 }
 
 export const ValidatorFunctions = {
-    dataType: (type, val, errorMessage, successMessage) => {
+    dataType: (val, type, errorMessage, successMessage) => {
         const validTypes = ['string', 'number', 'boolean', 'array', 'object'];
         if (!validTypes.includes(type)) throw new Error('Invalid Data Type');
 

@@ -50,43 +50,43 @@ export class SchemaField {
     }
 
     // Data Type Methods
-    string() {
+    string(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('string');
-        this.operationsMap['dataType'] = 'string';
+        this.operationsMap['dataTypeParams'] = ['string', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
 
-    number() {
+    number(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('number');
-        this.operationsMap['dataType'] = 'number';
+        this.operationsMap['dataTypeParams'] = ['number', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         return this;
     }
 
-    boolean() {
+    boolean(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('boolean');
-        this.operationsMap['dataType'] = 'boolean';
+        this.operationsMap['dataTypeParams'] = ['boolean', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
 
-    array() {
+    array(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('array');
-        this.operationsMap['dataType'] = 'array';
+        this.operationsMap['dataTypeParams'] = ['array', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
     }
 
-    object() {
+    object(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('object');
-        this.operationsMap['dataType'] = 'object';
+        this.operationsMap['dataTypeParams'] = ['object', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -146,13 +146,13 @@ export class SchemaField {
             return results;
         }
 
-        const dataType = opMap.dataType;
+        const dataTypeParams = opMap.dataTypeParams;
 
         // Handle Data Type Checks
-        this.#logResults(results, ValidatorFunctions.dataType(dataType, data), 'dataType');
+        this.#logResults(results, ValidatorFunctions.dataType(data, ...dataTypeParams), 'dataType');
 
         // Run Data Type Specific Checks
-        const validators = this.#getValidMethodArray(dataType);
+        const validators = this.#getValidMethodArray(dataTypeParams[0]);
         for (const validator of validators) {
             this.#logResults(results, validator.func(data, ...validator.value), validator.methodName);
         }
