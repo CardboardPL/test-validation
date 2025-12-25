@@ -1,9 +1,38 @@
 import { ValidatorFunctions } from './Validator.js';
 
 export class SchemaField {
-    #dataTypeMethodsLocked = false;
-    #stringMethodsLocked = false;
-    #numericalMethodsLocked = false;
+    #locks = {
+        dataType: {
+            locked: false,
+            associatedMethods: ['string', 'number', 'boolean', 'array', 'object'],
+            incompatibleTypes: [],
+        },
+        string: {
+            locked: false,
+            associatedMethods: ['minLength', 'maxLength'],
+            incompatibleTypes: ['dataType', 'number', 'boolean', 'array', 'object'],
+        },
+        number: {
+            locked: false,
+            associatedMethods: ['min', 'max'],
+            incompatibleTypes: ['dataType', 'string', 'boolean', 'array', 'object'],
+        },
+        boolean: {
+            locked: false,
+            associatedMethods: [],
+            incompatibleTypes: ['dataType', 'string', 'number', 'array', 'object'],
+        },
+        array: {
+            locked: false,
+            associatedMethods: [],
+            incompatibleTypes: ['dataType', 'string', 'number', 'boolean', 'object'],
+        },
+        object: {
+            locked: false,
+            associatedMethods: [],
+            incompatibleTypes: ['dataType', 'string', 'number', 'boolean', 'array'],
+        }
+    }
     #operationsMap = {
         stringMethods: [],
         numericalMethods: [],
@@ -14,6 +43,18 @@ export class SchemaField {
         this[methodName] = () => { 
             throw new Error(`${methodName} can't be called at this stage.`);
         };
+    }
+
+    #lockIncompatibleTypes(validType) {
+        for (const incompatibleType of this.#locks[validType].incompatibleTypes) {
+            const pType = this.#locks[incompatibleType];
+            pType.locked = true;
+
+            // Lock associated methods
+            for (const methodName of pType.associatedMethods) {
+                this.#lockMethod(methodName);
+            }
+        }
     }
 
     #logResults(results, checkResult, key) {
@@ -43,6 +84,18 @@ export class SchemaField {
         }
     }
 
+    #assertLock(categoryName, errorMessage = 'Failed') {
+        if (!this.#locks[categoryName].locked) {
+            throw new Error(errorMessage);
+        } 
+    }
+
+    #defineTypeSpecificMethod(name, category, assertName, assertMsg, value, func) {
+        this.#assertLock(assertName, assertMsg);
+        this.#pushMethod(category, name, value, func);
+        this.#lockMethod(name);
+    }
+
     // General Methods
     required(errorMessage = null, successMessage = null) {
         this.#operationsMap['requiredParams'] = [true, errorMessage, successMessage];
@@ -52,82 +105,94 @@ export class SchemaField {
 
     // Data Type Methods
     string(errorMessage = null, successMessage = null) {
-        if (this.#dataTypeMethodsLocked) this.#lockMethod('string');
         this.#operationsMap['dataTypeParams'] = ['string', errorMessage, successMessage];
-        this.#dataTypeMethodsLocked = true;
-        this.#numericalMethodsLocked = true;
+        this.#lockIncompatibleTypes('string');
         return this;
     }
 
     number(errorMessage = null, successMessage = null) {
-        if (this.#dataTypeMethodsLocked) this.#lockMethod('number');
         this.#operationsMap['dataTypeParams'] = ['number', errorMessage, successMessage];
-        this.#dataTypeMethodsLocked = true;
-        this.#stringMethodsLocked = true;
+        this.#lockIncompatibleTypes('number');
         return this;
     }
 
     boolean(errorMessage = null, successMessage = null) {
-        if (this.#dataTypeMethodsLocked) this.#lockMethod('boolean');
         this.#operationsMap['dataTypeParams'] = ['boolean', errorMessage, successMessage];
-        this.#dataTypeMethodsLocked = true;
-        this.#stringMethodsLocked = true;
-        this.#numericalMethodsLocked = true;
+        this.#lockIncompatibleTypes('boolean');
         return this;
     }
 
     array(errorMessage = null, successMessage = null) {
-        if (this.#dataTypeMethodsLocked) this.#lockMethod('array');
         this.#operationsMap['dataTypeParams'] = ['array', errorMessage, successMessage];
-        this.#dataTypeMethodsLocked = true;
-        this.#stringMethodsLocked = true;
-        this.#numericalMethodsLocked = true;
+        this.#lockIncompatibleTypes('array');
         return this;
     }
 
     object(errorMessage = null, successMessage = null) {
-        if (this.#dataTypeMethodsLocked) this.#lockMethod('object');
         this.#operationsMap['dataTypeParams'] = ['object', errorMessage, successMessage];
-        this.#dataTypeMethodsLocked = true;
-        this.#stringMethodsLocked = true;
-        this.#numericalMethodsLocked = true;
+        this.#lockIncompatibleTypes('object');
         return this;
     }
 
     // Numerical Methods
     integer(errorMessage = null, successMessage = null) {
-        if (this.#numericalMethodsLocked) this.#lockMethod('integer');
-        this.#pushMethod('numericalMethods', 'integer', [errorMessage, successMessage], ValidatorFunctions.integer);
-        this.#lockMethod('integer');
+        this.#defineTypeSpecificMethod(
+            'integer',
+            'numericalMethods',
+            'dataType',
+            'Failed: Define the data type before running type-specfic methods.',
+            [errorMessage, successMessage],
+            ValidatorFunctions.integer
+        )
         return this;
     }
 
     min(value, errorMessage = null, successMessage = null) {
-        if (this.#numericalMethodsLocked) this.#lockMethod('min');
-        this.#pushMethod('numericalMethods', 'min', [value, errorMessage, successMessage], ValidatorFunctions.min);
-        this.#lockMethod('min');
+        this.#defineTypeSpecificMethod(
+            'min',
+            'numericalMethods',
+            'dataType',
+            'Failed: Define the data type before running type-specfic methods.',
+            [value, errorMessage, successMessage],
+            ValidatorFunctions.min
+        )
         return this;
     }
 
     max(value, errorMessage = null, successMessage = null) {
-        if (this.#numericalMethodsLocked) this.#lockMethod('max');
-        this.#pushMethod('numericalMethods', 'max', [value, errorMessage, successMessage], ValidatorFunctions.max);
-        this.#lockMethod('max');
+        this.#defineTypeSpecificMethod(
+            'max',
+            'numericalMethods',
+            'dataType',
+            'Failed: Define the data type before running type-specfic methods.',
+            [value, errorMessage, successMessage],
+            ValidatorFunctions.max
+        )
         return this;
     }
 
     // String methods
     minLength(value, errorMessage = null, successMessage = null) {
-        if (this.#stringMethodsLocked) this.#lockMethod('minLength');
-        this.#pushMethod('stringMethods', 'minLength', [value, errorMessage, successMessage], ValidatorFunctions.minLength);
-        this.#lockMethod('minLength');
+        this.#defineTypeSpecificMethod(
+            'minLength',
+            'stringMethods',
+            'dataType',
+            'Failed: Define the data type before running type-specfic methods.',
+            [value, errorMessage, successMessage],
+            ValidatorFunctions.minLength
+        )
         return this;
     }
 
     maxLength(value, errorMessage = null, successMessage = null) {
-        if (this.#stringMethodsLocked) this.#lockMethod('maxLength');
-        this.#pushMethod('stringMethods', 'maxLength', [value, errorMessage, successMessage], ValidatorFunctions.maxLength);
-        this.#lockMethod('maxLength');
+        this.#defineTypeSpecificMethod(
+            'maxLength',
+            'stringMethods',
+            'dataType',
+            'Failed: Define the data type before running type-specfic methods.',
+            [value, errorMessage, successMessage],
+            ValidatorFunctions.maxLength
+        )
         return this;
     }
 
@@ -155,6 +220,7 @@ export class SchemaField {
         if (earlyExit.req && !reqResults.status) return results;
 
         const dataTypeParams = opMap.dataTypeParams;
+        if (!dataTypeParams) throw new Error('Failed: Define the schemaField before running "validate".');
 
         // Handle Data Type Checks
         this.#logResults(results, ValidatorFunctions.dataType(data, ...dataTypeParams), 'dataType');
