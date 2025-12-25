@@ -4,7 +4,7 @@ export class SchemaField {
     #dataTypeMethodsLocked = false;
     #stringMethodsLocked = false;
     #numericalMethodsLocked = false;
-    operationsMap = {
+    #operationsMap = {
         stringMethods: [],
         numericalMethods: [],
         requiredParams: [false],
@@ -24,8 +24,8 @@ export class SchemaField {
     }
 
     #pushMethod(location, methodName, value, func) {
-        if (!Array.isArray(this.operationsMap[location])) throw new Error('Invalid location.');
-        this.operationsMap[location].push({
+        if (!Array.isArray(this.#operationsMap[location])) throw new Error('Invalid location.');
+        this.#operationsMap[location].push({
             methodName,
             value,
             func
@@ -35,9 +35,9 @@ export class SchemaField {
     #getValidMethodArray(dataType) {
         switch(dataType) {
             case 'number':
-                return this.operationsMap.numericalMethods;
+                return this.#operationsMap.numericalMethods;
             case 'string':
-                return this.operationsMap.stringMethods;
+                return this.#operationsMap.stringMethods;
             default:
                 throw new Error('Invalid data type');
         }
@@ -45,7 +45,7 @@ export class SchemaField {
 
     // General Methods
     required(errorMessage = null, successMessage = null) {
-        this.operationsMap['requiredParams'] = [true, errorMessage, successMessage];
+        this.#operationsMap['requiredParams'] = [true, errorMessage, successMessage];
         this.#lockMethod('required');
         return this;
     }
@@ -53,7 +53,7 @@ export class SchemaField {
     // Data Type Methods
     string(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('string');
-        this.operationsMap['dataTypeParams'] = ['string', errorMessage, successMessage];
+        this.#operationsMap['dataTypeParams'] = ['string', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#numericalMethodsLocked = true;
         return this;
@@ -61,7 +61,7 @@ export class SchemaField {
 
     number(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('number');
-        this.operationsMap['dataTypeParams'] = ['number', errorMessage, successMessage];
+        this.#operationsMap['dataTypeParams'] = ['number', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         return this;
@@ -69,7 +69,7 @@ export class SchemaField {
 
     boolean(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('boolean');
-        this.operationsMap['dataTypeParams'] = ['boolean', errorMessage, successMessage];
+        this.#operationsMap['dataTypeParams'] = ['boolean', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -78,7 +78,7 @@ export class SchemaField {
 
     array(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('array');
-        this.operationsMap['dataTypeParams'] = ['array', errorMessage, successMessage];
+        this.#operationsMap['dataTypeParams'] = ['array', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -87,7 +87,7 @@ export class SchemaField {
 
     object(errorMessage = null, successMessage = null) {
         if (this.#dataTypeMethodsLocked) this.#lockMethod('object');
-        this.operationsMap['dataTypeParams'] = ['object', errorMessage, successMessage];
+        this.#operationsMap['dataTypeParams'] = ['object', errorMessage, successMessage];
         this.#dataTypeMethodsLocked = true;
         this.#stringMethodsLocked = true;
         this.#numericalMethodsLocked = true;
@@ -138,7 +138,7 @@ export class SchemaField {
             req: true
         }
     ) {
-        const opMap = this.operationsMap;
+        const opMap = this.#operationsMap;
         const results = {
             status: true,
             checks: {}
