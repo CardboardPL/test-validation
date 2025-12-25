@@ -6,7 +6,8 @@ export class SchemaField {
     #numericalMethodsLocked = false;
     operationsMap = {
         stringMethods: [],
-        numericalMethods: []
+        numericalMethods: [],
+        requiredParams: [false],
     };
 
     #lockMethod(methodName) {
@@ -43,8 +44,8 @@ export class SchemaField {
     }
 
     // General Methods
-    required() {
-        this.operationsMap['required'] = true;
+    required(errorMessage = null, successMessage = null) {
+        this.operationsMap['requiredParams'] = [true, errorMessage, successMessage];
         this.#lockMethod('required');
         return this;
     }
@@ -131,20 +132,27 @@ export class SchemaField {
     }
 
     // Validation Method
-    validate(data) {
+    validate(
+        data, 
+        earlyExit = {
+            req: true
+        }
+    ) {
         const opMap = this.operationsMap;
         const results = {
             status: true,
             checks: {}
         }
 
-        if (opMap.required && (data == null || data === '')) {
-            this.#logResults(results, { 
-                status: false, 
-                message: 'Field is required'
-            }, 'schemaField');
-            return results;
-        }
+        const reqParams = opMap['requiredParams'];
+        const reqResults = ValidatorFunctions.required(data, ...reqParams);
+        this.#logResults(
+            results, 
+            reqResults, 
+            'required'
+        );
+
+        if (earlyExit.req && !reqResults.status) return results;
 
         const dataTypeParams = opMap.dataTypeParams;
 

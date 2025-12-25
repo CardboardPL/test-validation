@@ -8,6 +8,15 @@ function createValidationResult(status, errorMessage = 'Failed', successMessage 
 }
 
 export const ValidatorFunctions = {
+    required: (data, isRequired, errorMessage, successMessage) => {
+        const isValid = !isRequired || (data != null && data !== '');
+        return createValidationResult(
+            isValid, 
+            errorMessage || 'Failed: Expected a value.', 
+            successMessage || 'Success'
+        );
+    },
+
     dataType: (val, type, errorMessage, successMessage) => {
         const validTypes = ['string', 'number', 'boolean', 'array', 'object'];
         if (!validTypes.includes(type)) throw new Error('Invalid Data Type');
