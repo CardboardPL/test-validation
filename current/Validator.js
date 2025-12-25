@@ -71,7 +71,7 @@ export const ValidatorFunctions = {
 
     // String specific functions
     minLength: (val, minLength, errorMessage, successMessage) => {
-        const isValid = val.length >= minLength;
+        const isValid = val != null ? val.length >= minLength : false;
         return createValidationResult(
             isValid, 
             errorMessage || `Failed expected a length greater than or equal to ${minLength} but received ${val.length}.`,
@@ -80,7 +80,7 @@ export const ValidatorFunctions = {
     },
 
     maxLength: (val, maxLength, errorMessage, successMessage) => {
-        const isValid = val.length <= maxLength;
+        const isValid = val != null ? val.length <= maxLength : false;
         return createValidationResult(
             isValid, 
             errorMessage || `Failed expected a length less than or equal to ${maxLength} but received ${val.length}.`,
